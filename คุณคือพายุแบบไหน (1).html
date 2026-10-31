@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>คุณคือพายุแบบไหน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500&family=Noto+Serif+Thai:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff; --surface:#ffffff; --ink:#1c2230; --muted:#5d6678; --line:#dde1e8;
+  --accent:#4f8fd6; --tint:#e9f1fb;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root{color-scheme:light}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai",system-ui,sans-serif;font-weight:300;font-size:1.0625rem;line-height:1.8;transition:background .8s}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(120% 60% at 50% 0%,var(--tint),transparent 70%);transition:background .8s;pointer-events:none;z-index:-1}
+main{max-width:640px;margin:0 auto;padding:2rem 1.25rem 4rem}
+h1,h2,h3{font-family:"Noto Serif Thai",serif;font-weight:600;line-height:1.4;margin:0}
+h1{font-size:clamp(2rem,7vw,2.75rem)}
+h2{font-size:clamp(1.4rem,5vw,1.75rem)}
+h3{font-size:1.1rem}
+p{margin:0}
+.muted{color:var(--muted)}
+.view{display:none}.view.on{display:block}
+
+/* intro */
+.cloud{display:block;width:100%;max-width:420px;height:auto;margin:3vh auto 2rem}
+#intro{text-align:center;padding-top:2vh}
+#intro p{max-width:30em;margin:1rem auto 2rem}
+.btn{font:inherit;font-weight:500;background:var(--ink);color:var(--bg);border:0;border-radius:999px;padding:.8rem 2rem;cursor:pointer;transition:transform .15s,opacity .15s}
+.btn:hover{opacity:.88}.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+/* progress: a horizon with a drifting dot */
+.track{position:relative;height:2px;background:var(--line);margin:0 0 2.5rem;border-radius:2px}
+.track i{position:absolute;left:0;top:0;height:2px;background:var(--accent);width:0;transition:width .5s,background .5s;border-radius:2px}
+.track b{position:absolute;top:-5px;width:12px;height:12px;border-radius:50%;background:var(--accent);margin-left:-6px;left:0;transition:left .5s,background .5s}
+.count{font-size:.9rem;color:var(--muted);margin-bottom:.5rem}
+.scene{color:var(--muted);margin:.75rem 0 .25rem;font-family:"Noto Serif Thai",serif;font-weight:400}
+.ask{margin-bottom:1.75rem}
+.opts{display:grid;gap:.75rem;padding:0;margin:0;list-style:none}
+.opt{width:100%;text-align:left;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:1rem 1.15rem;cursor:pointer;line-height:1.6;transition:border-color .2s,transform .15s,background .2s}
+.opt:hover{border-color:var(--accent)}
+.opt:active{transform:scale(.99)}
+.opt.picked{border-color:var(--accent);background:var(--tint)}
+
+/* result */
+.badge{width:64px;height:64px;border-radius:50%;background:var(--accent);margin:0 0 1.25rem;opacity:.9}
+.kicker{color:var(--muted);margin-bottom:.25rem}
+.lead{margin:1rem 0 2rem}
+section.blk{border-top:1px solid var(--line);padding:1.5rem 0}
+section.blk h3{margin-bottom:.75rem}
+ul.plain{margin:0;padding:0;list-style:none;display:grid;gap:.9rem}
+ul.plain li{padding-left:1.1rem;position:relative}
+ul.plain li::before{content:"";position:absolute;left:0;top:.8em;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+ul.plain strong{font-weight:500}
+.mix{display:grid;gap:.6rem}
+.row{display:grid;grid-template-columns:7.5rem 1fr 2.5rem;gap:.75rem;align-items:center;font-size:.95rem}
+.bar{height:8px;border-radius:8px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:8px;transition:width .9s .2s}
+.row span:last-child{text-align:right;color:var(--muted)}
+.actions{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.5rem}
+.note{font-size:.88rem;color:var(--muted);margin-top:2rem}
+@media (max-width:480px){.row{grid-template-columns:6rem 1fr 2.25rem}}
+.snd{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right:12px;z-index:5;display:flex;align-items:center;gap:.5rem;font:inherit;font-size:.9rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:.4rem .9rem .4rem .7rem;cursor:pointer;transition:border-color .2s}
+.snd:hover{border-color:var(--accent)}
+.snd svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.snd .x{display:none}.snd[aria-pressed="false"] .x{display:block}.snd[aria-pressed="false"] .w{display:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.drift{animation:drift 9s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translateX(14px)}}
+</style>
+</head>
+<body>
+<button class="snd" id="snd" type="button" aria-pressed="false" aria-label="เปิดหรือปิดเสียงฝน">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="w" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/><path class="x" d="M17 9l5 6M22 9l-5 6"/></svg>
+  <span id="sndt">เสียงฝน</span>
+</button>
+<main>
+
+<section id="intro" class="view on">
+  <svg class="cloud" viewBox="0 0 420 200" role="img" aria-label="ก้อนเมฆสีต่างๆ ลอยอยู่บนท้องฟ้า">
+    <g class="drift" fill="none" stroke-width="2.5" stroke-linecap="round">
+      <path d="M70 120a26 26 0 0 1 8-50 34 34 0 0 1 64-8 28 28 0 0 1 18 58z" stroke="#4f8fd6"/>
+      <path d="M170 150a22 22 0 0 1 6-42 30 30 0 0 1 56-6 24 24 0 0 1 14 48z" stroke="#7a5fc4" transform="translate(70 -10)"/>
+      <path d="M40 170a18 18 0 0 1 4-34 24 24 0 0 1 46-4 18 18 0 0 1 10 38z" stroke="#e0a030" transform="translate(-10 0)"/>
+      <path d="M250 70a16 16 0 0 1 4-30 22 22 0 0 1 42-4 16 16 0 0 1 8 34z" stroke="#d2503e" transform="translate(60 0)"/>
+      <path d="M130 60a14 14 0 0 1 4-26 20 20 0 0 1 38-4 14 14 0 0 1 8 30z" stroke="#3f9c8a" transform="translate(-20 0)"/>
+    </g>
+  </svg>
+  <h1>คุณคือพายุแบบไหน</h1>
+  <p class="muted">ห้าฉากสั้นๆ บนชายหาดที่พายุกำลังเข้า เลือกสิ่งที่ใกล้เคียงกับคุณที่สุด ไม่มีคำตอบถูกหรือผิด ใช้เวลาประมาณ 2 นาที เมื่อเริ่มแล้วจะมีเสียงฝนเบาๆ คลอไปด้วย ปิดได้ทุกเมื่อที่มุมขวาบน</p>
+  <button class="btn" id="start">เริ่มเดินทาง</button>
+</section>
+
+<section id="quiz" class="view" aria-live="polite">
+  <div class="track" aria-hidden="true"><i id="fill"></i><b id="dot"></b></div>
+  <div class="count" id="count"></div>
+  <p class="scene" id="scene"></p>
+  <h2 class="ask" id="ask"></h2>
+  <ul class="opts" id="opts"></ul>
+</section>
+
+<section id="result" class="view">
+  <div class="badge" id="badge"></div>
+  <p class="kicker" id="rtype"></p>
+  <h1 id="rname"></h1>
+  <p class="lead" id="rintro"></p>
+
+  <section class="blk"><h3>สีของคุณบอกอะไร</h3><p id="rcolor"></p></section>
+  <section class="blk"><h3>จุดแข็งที่โดดเด่น</h3><ul class="plain" id="rstr"></ul></section>
+  <section class="blk"><h3>มุมที่อาจเป็นอุปสรรค</h3><p id="rblind"></p></section>
+  <section class="blk"><h3>ลองทำดูในชีวิตประจำวัน</h3><ul class="plain" id="radv"></ul></section>
+  <section class="blk"><h3>ส่วนผสมของพายุในตัวคุณ</h3><div class="mix" id="mix"></div></section>
+
+  <div class="actions">
+    <button class="btn" id="again">ทำแบบทดสอบอีกครั้ง</button>
+  </div>
+  <p class="note">แบบทดสอบนี้สร้างเพื่อการสำรวจตัวเองและความสนุก ไม่ใช่การวินิจฉัยทางการแพทย์หรือจิตวิทยา คุณเปลี่ยนแปลงและเติบโตได้เสมอ</p>
+</section>
+
+</main>
+
+<script>
+const T = {
+  B:{name:"พายุฝนสีฟ้า",en:"The Steady Rain",c:"#4f8fd6",tint:"#e9f1fb",tintD:"#1f2c42",
+     intro:"คุณคือฝนที่ตกสม่ำเสมอ ไม่รีบร้อน แต่หล่อเลี้ยงทุกอย่างรอบตัว คนมักรู้สึกปลอดภัยเมื่ออยู่ใกล้คุณ เพราะคุณคิดก่อนทำ ฟังก่อนพูด และไม่ปล่อยให้อารมณ์ชั่ววูบพาไป",
+     color:"สีฟ้าในจิตวิทยาสีมักสัมพันธ์กับความสงบ ความน่าเชื่อถือ และการใช้เหตุผล ซึ่งสะท้อนวิธีที่คุณรับมือกับความเปลี่ยนแปลงอย่างมีสติ (ลักษณะนี้ใกล้เคียงกับมิติ Emotional Stability ใน Big Five)",
+     str:["ใจเย็นและตั้งสติได้ดีในสถานการณ์ตึงเครียด","คิดเป็นขั้นตอน มองเห็นภาพรวมก่อนตัดสินใจ","เป็นที่พึ่งทางใจที่คนรอบข้างไว้ใจ"],
+     blind:"ความนิ่งของคุณบางครั้งอาจถูกมองว่าเฉย หรือทำให้คุณใช้เวลาคิดนานจนพลาดจังหวะสำคัญ และบางทีคุณก็เก็บความรู้สึกไว้จนคนอื่นไม่รู้ว่าคุณต้องการอะไร",
+     adv:["ตั้งเวลาคิดให้ตัวเอง เช่น 24 ชั่วโมง แล้วลงมือทำแม้ยังไม่สมบูรณ์","บอกความรู้สึกสั้นๆ กับคนใกล้ชิดสัปดาห์ละหนึ่งครั้ง","ลองทำสิ่งเล็กๆ ที่ไม่ได้วางแผนไว้ เพื่อฝึกความยืดหยุ่น"]},
+  V:{name:"พายุฟ้าคะนองสีม่วง",en:"The Electric Dreamer",c:"#7a5fc4",tint:"#f0ecfa",tintD:"#2a2442",
+     intro:"คุณคือสายฟ้าที่แวบความคิดขึ้นมากลางความมืด ลึก ละเอียดอ่อน และมีโลกภายในที่สีสันจัด คุณมองเห็นความเชื่อมโยงที่คนอื่นมองข้าม และมักมีมุมมองที่ไม่เหมือนใคร",
+     color:"สีม่วงมักสัมพันธ์กับจินตนาการ ความคิดสร้างสรรค์ และการสำรวจความหมายลึกๆ สอดคล้องกับลักษณะ Openness to Experience ที่สูงในแนว Big Five",
+     str:["จินตนาการและความคิดสร้างสรรค์โดดเด่น","เข้าใจอารมณ์และความหมายเบื้องหลังเรื่องราว","กล้าคิดนอกกรอบและมีเอกลักษณ์ของตัวเอง"],
+     blind:"โลกในหัวที่คึกคักอาจพาคุณคิดวนหรือกังวลล่วงหน้า และบางครั้งคุณอาจเก็บไอเดียดีๆ ไว้คนเดียวเพราะกลัวว่าคนอื่นจะไม่เข้าใจ",
+     adv:["จดความคิดลงสมุดเมื่อเริ่มวน แล้วเลือกข้อเดียวที่ลงมือได้วันนี้","แชร์ไอเดียที่ยังไม่เสร็จกับคนที่ไว้ใจ ไม่ต้องรอให้สมบูรณ์","กำหนดเวลาพักจากหน้าจอและความคิด เช่น เดินเล่น 15 นาที"]},
+  A:{name:"พายุทรายสีอำพัน",en:"The Golden Whirl",c:"#e0a030",tint:"#fbf3e2",tintD:"#3a3020",
+     intro:"คุณคือลมหมุนสีทองที่พัดพาพลังงานไปทุกที่ที่ผ่าน มองโลกในแง่ดี ปรับตัวไว และทำให้บรรยากาศรอบตัวมีชีวิตชีวา คนมักอยากอยู่ใกล้คุณเพราะรู้สึกสนุกและมีความหวัง",
+     color:"สีเหลืองอำพันสื่อถึงความอบอุ่น การมองโลกบวก และความกระตือรือร้น สะท้อนลักษณะ Extraversion และความยืดหยุ่นต่อสถานการณ์ใหม่ๆ",
+     str:["สร้างพลังบวกและทำให้คนรอบข้างผ่อนคลาย","ปรับตัวและหาทางออกใหม่ๆ ได้เร็ว","เข้าสังคมเก่ง เปิดใจรับคนและประสบการณ์ใหม่"],
+     blind:"ความสนใจที่ไหลไปเร็วอาจทำให้งานบางอย่างค้างครึ่งทาง และการพยายามทำให้ทุกคนยิ้มได้อาจทำให้คุณซ่อนความรู้สึกจริงๆ ของตัวเอง",
+     adv:["เลือกเป้าหมายหลักไม่เกิน 3 เรื่องต่อสัปดาห์ แล้วปิดให้จบทีละเรื่อง","ให้เวลาตัวเองอยู่เงียบๆ เพื่อฟังว่าจริงๆ แล้วรู้สึกอย่างไร","ขอความช่วยเหลือบ้าง ไม่ต้องเป็นแหล่งพลังให้ทุกคนตลอดเวลา"]},
+  R:{name:"ไต้ฝุ่นสีแดง",en:"The Driving Typhoon",c:"#d2503e",tint:"#fbeae7",tintD:"#3d2422",
+     intro:"คุณคือพายุที่มีทิศทางชัดเจน ตัดสินใจเร็ว กล้ารับผิดชอบ และผลักดันให้สิ่งต่างๆ เดินหน้า เมื่อทุกคนลังเล คุณมักเป็นคนแรกที่ก้าวออกมาบอกว่า ไปทางนี้",
+     color:"สีแดงเกี่ยวข้องกับพลัง ความมุ่งมั่น และการลงมือทำ สะท้อนแนวโน้มด้าน Conscientiousness และความเป็นผู้นำที่ชัดเจน",
+     str:["ตัดสินใจเด็ดขาดและมีภาวะผู้นำ","มุ่งเป้าหมายและลงมือทำจนเห็นผล","พูดตรง ชัดเจน ทำให้งานเดินได้เร็ว"],
+     blind:"ความเร็วและความตรงไปตรงมาอาจทำให้คนรอบข้างตามไม่ทัน หรือรู้สึกว่าไม่มีพื้นที่ให้พูด และคุณอาจกดดันตัวเองให้ต้องเป็นคนแก้ปัญหาทุกอย่าง",
+     adv:["ก่อนสรุป ลองถามคนอื่นหนึ่งคำถาม เช่น คุณคิดอย่างไรกับเรื่องนี้","ฝึกชมความพยายามของคนอื่นให้เท่ากับการชมผลลัพธ์","จัดเวลาพักที่ไม่มีเป้าหมาย เพื่อให้พลังงานฟื้นตัว"]},
+  G:{name:"พายุหมอกสีเขียวมรกต",en:"The Gentle Mist",c:"#3f9c8a",tint:"#e6f3f0",tintD:"#1d3430",
+     intro:"คุณคือหมอกบางที่โอบทุกคนไว้อย่างนุ่มนวล ใส่ใจความรู้สึกของคนรอบข้าง และเป็นกาวใจที่ทำให้กลุ่มอยู่ด้วยกันได้ แม้ในวันที่ลมแรง",
+     color:"สีเขียวมักสัมพันธ์กับความสมดุล การเยียวยา และการดูแล สอดคล้องกับลักษณะ Agreeableness ที่สูง คือเห็นอกเห็นใจและให้ความสำคัญกับความสัมพันธ์",
+     str:["เข้าอกเข้าใจและรับรู้ความรู้สึกของผู้อื่นได้ไว","สร้างความไว้ใจและบรรยากาศปลอดภัยในกลุ่ม","ประสานความต่างให้อยู่ร่วมกันได้"],
+     blind:"การนึกถึงคนอื่นก่อนอาจทำให้คุณลืมความต้องการของตัวเอง หรือเลี่ยงการพูดสิ่งที่ไม่ลงรอยเพราะกลัวกระทบความสัมพันธ์",
+     adv:["ฝึกพูดประโยคว่า ฉันอยากได้... อย่างน้อยวันละหนึ่งครั้ง","ปฏิเสธเรื่องเล็กๆ ที่ไม่ไหว เพื่อสร้างขอบเขตให้ตัวเอง","เช็กความรู้สึกตัวเองก่อนนอน ถามว่า วันนี้ฉันต้องการอะไร"]}
+};
+
+const Q = [
+ {s:"ชายหาดตอนเย็น ท้องฟ้าฝั่งทะเลเริ่มมืดลง เมฆก้อนใหญ่กำลังเคลื่อนเข้ามา",q:"สิ่งแรกที่คุณทำคืออะไร",
+  o:[["B","นั่งลง หายใจช้าๆ แล้วดูว่าเมฆจะเคลื่อนไปทางไหน"],["V","จินตนาการว่าเมฆนั้นเป็นรูปอะไร แล้วหยิบสมุดมาจด"],["A","ชวนคนแถวนั้นมาดูด้วยกัน แล้วถ่ายรูปเก็บไว้"],["R","ประเมินทิศทางลม แล้วตัดสินใจทันทีว่าจะหลบหรือรอรับ"]]},
+ {s:"ลมแรงขึ้น คุณหลบเข้ากระท่อมริมหาด ไฟดับพอดี และคนในกระท่อมเริ่มกังวล",q:"คุณจะทำอะไร",
+  o:[["V","เล่าเรื่องแปลกๆ หรือคิดเกมเล่นกันในความมืด"],["A","ทำให้ทุกคนหัวเราะ แล้วชวนร้องเพลง"],["R","หาไฟฉาย แล้วแบ่งงานให้ทุกคนทันที"],["G","เดินไปถามทีละคนว่าโอเคไหม ต้องการอะไรหรือเปล่า"]]},
+ {s:"พายุเข้าเต็มที่ ฝนเทหนัก สัญญาณโทรศัพท์หาย และแผนที่คุณวางไว้ใช้ไม่ได้แล้ว",q:"คุณเลือกทางไหน",
+  o:[["A","ลองทางใหม่ดูก่อน เดี๋ยวก็เจอทางออกเอง"],["R","ตั้งเป้าให้ชัด แล้วลุยตามนั้นโดยไม่ลังเล"],["G","อยู่ใกล้กลุ่ม ให้ทุกคนไปด้วยกันไม่หลุดใคร"],["B","หยุดนิ่ง ตั้งสติ แล้วคิดทีละขั้น"]]},
+ {s:"กลางพายุ มีคนในทีมพลาดจนทุกคนเสียเวลา",q:"คุณตอบสนองอย่างไร",
+  o:[["R","บอกตรงๆ ว่าต้องแก้อะไร แล้วไปต่อ"],["G","ปลอบใจก่อน บอกว่าไม่เป็นไรนะ เกิดขึ้นได้"],["B","ไม่โทษใคร มองหาสาเหตุอย่างสงบ"],["V","เก็บความรู้สึกไว้ข้างใน แล้วคิดทบทวนว่าทำไมถึงเกิดเรื่องนี้"]]},
+ {s:"พายุเริ่มสงบ เมฆแหวกออก มีแสงสุดท้ายของวันส่องลงมา",q:"คุณอยากทำอะไรมากที่สุด",
+  o:[["G","อยู่กับทุกคน แลกเปลี่ยนกันว่าแต่ละคนรู้สึกอย่างไร"],["B","นั่งเงียบๆ ซึมซับความสงบ"],["V","เขียนหรือวาดสิ่งที่เพิ่งผ่านมา"],["A","วิ่งลงทะเล แล้วฉลองกัน"]]}
+];
+
+const $ = id => document.getElementById(id);
+let i = 0, score, order;
+/* Calm rain, synthesized in the browser (no audio files) */
+let ac, master, rainOnFlag = false, userMuted = false, dropTimer;
+function buildRain(){
+  ac = new (window.AudioContext || window.webkitAudioContext)();
+  const n = ac.sampleRate * 4, buf = ac.createBuffer(2, n, ac.sampleRate), brown = ac.createBuffer(2, n, ac.sampleRate);
+  for (let c = 0; c < 2; c++){
+    const w = buf.getChannelData(c), b = brown.getChannelData(c); let last = 0;
+    for (let k = 0; k < n; k++){ const r = Math.random()*2-1; w[k] = r; last = (last + 0.02*r)/1.02; b[k] = last*3.5; }
+  }
+  master = ac.createGain(); master.gain.value = 0; master.connect(ac.destination);
+  const layer = (buffer, nodes, vol) => {
+    const s = ac.createBufferSource(); s.buffer = buffer; s.loop = true;
+    const g = ac.createGain(); g.gain.value = vol;
+    let p = s; nodes.forEach(x => { p.connect(x); p = x; }); p.connect(g); g.connect(master); s.start();
+  };
+  const hp = ac.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 900;
+  const lp = ac.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 6500;
+  layer(buf, [hp, lp], 0.16);
+  const lb = ac.createBiquadFilter(); lb.type = "lowpass"; lb.frequency.value = 500;
+  layer(brown, [lb], 0.5);
+}
+function drop(){
+  if (!rainOnFlag || !ac) return;
+  const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime;
+  o.type = "sine"; o.frequency.setValueAtTime(1400 + Math.random()*2200, t);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.025, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.09);
+  dropTimer = setTimeout(drop, 120 + Math.random()*700);
+}
+function rainOn(){
+  try{
+    if (!ac) buildRain();
+    ac.resume(); rainOnFlag = true;
+    master.gain.cancelScheduledValues(ac.currentTime);
+    master.gain.linearRampToValueAtTime(0.4, ac.currentTime + 2.5);
+    clearTimeout(dropTimer); drop();
+  }catch(e){ rainOnFlag = false; }
+  syncSnd();
+}
+function rainOff(){
+  rainOnFlag = false; clearTimeout(dropTimer);
+  try{ if (ac){ master.gain.cancelScheduledValues(ac.currentTime); master.gain.linearRampToValueAtTime(0, ac.currentTime + 0.8); } }catch(e){}
+  syncSnd();
+}
+function syncSnd(){
+  $("snd").setAttribute("aria-pressed", rainOnFlag ? "true" : "false");
+  $("sndt").textContent = rainOnFlag ? "เสียงฝน: เปิด" : "เสียงฝน: ปิด";
+}
+$("snd").onclick = () => { if (rainOnFlag){ userMuted = true; rainOff(); } else { userMuted = false; rainOn(); } };
+syncSnd();
+
+function show(id){
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === id));
+  window.scrollTo({top:0});
+}
+function theme(k){
+  const r = document.documentElement.style, t = T[k];
+  r.setProperty("--accent", t.c);
+  r.setProperty("--tint", t.tint);
+}
+function start(){
+  if (!userMuted && !rainOnFlag) rainOn();
+  i = 0; score = {B:0,V:0,A:0,R:0,G:0}; order = [];
+  document.documentElement.style.removeProperty("--accent");
+  document.documentElement.style.removeProperty("--tint");
+  show("quiz"); render();
+}
+function render(){
+  const q = Q[i];
+  $("count").textContent = "ฉากที่ " + (i+1) + " จาก " + Q.length;
+  $("scene").textContent = q.s;
+  $("ask").textContent = q.q;
+  const pct = (i / Q.length) * 100;
+  $("fill").style.width = pct + "%"; $("dot").style.left = pct + "%";
+  const ul = $("opts"); ul.innerHTML = "";
+  q.o.forEach(([k, text]) => {
+    const li = document.createElement("li");
+    const b = document.createElement("button");
+    b.className = "opt"; b.type = "button"; b.textContent = text;
+    b.onclick = () => pick(k, b);
+    li.appendChild(b); ul.appendChild(li);
+  });
+  $("ask").setAttribute("tabindex","-1");
+}
+function pick(k, btn){
+  btn.classList.add("picked");
+  document.querySelectorAll(".opt").forEach(b => b.disabled = true);
+  score[k]++; order.push(k); theme(k);
+  setTimeout(() => { i++; i < Q.length ? render() : result(); }, 420);
+}
+function result(){
+  const keys = Object.keys(score);
+  const top = keys.sort((a,b) => score[b]-score[a] || order.indexOf(a) - order.indexOf(b))[0];
+  const t = T[top]; theme(top);
+  $("fill").style.width = "100%"; $("dot").style.left = "100%";
+  $("badge").style.background = t.c;
+  $("rtype").textContent = t.en;
+  $("rname").textContent = t.name;
+  $("rintro").textContent = t.intro;
+  $("rcolor").textContent = t.color;
+  $("rblind").textContent = t.blind;
+  $("rstr").innerHTML = t.str.map(s => "<li>" + s + "</li>").join("");
+  $("radv").innerHTML = t.adv.map(s => "<li>" + s + "</li>").join("");
+  const mix = $("mix"); mix.innerHTML = "";
+  Object.keys(T).sort((a,b) => score[b]-score[a]).forEach(k => {
+    const p = Math.round(score[k] / Q.length * 100);
+    const row = document.createElement("div"); row.className = "row";
+    row.innerHTML = '<span>' + T[k].name.replace("พายุ","") + '</span><div class="bar"><i style="background:' + T[k].c + '" data-w="' + p + '"></i></div><span>' + p + '%</span>';
+    mix.appendChild(row);
+  });
+  show("result");
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.querySelectorAll(".bar i").forEach(e => e.style.width = e.dataset.w + "%");
+  }));
+}
+$("start").onclick = start;
+$("again").onclick = () => { show("intro"); document.documentElement.style.removeProperty("--accent"); document.documentElement.style.removeProperty("--tint"); };
+</script>
+</body>
+</html>
